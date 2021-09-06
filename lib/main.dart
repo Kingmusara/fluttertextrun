@@ -1,446 +1,221 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:marquee/marquee.dart';
+import 'dart:async';
 
-import 'index.dart';
+void main() => runApp(selmanApp());
 
-/*Form widget email check pass en az 5 karakter buyuk kucuk renk degisimleri **/
-void main() => runApp(MyApp());
+class selmanApp extends StatelessWidget {
+  const selmanApp({Key? key}) : super(key: key);
 
-class MyApp extends StatelessWidget /*Degismeyen mqlar*/ {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Hocam uygulama hoj",
+      title: "Baba meraba bune",
       home: Iskele(),
     );
   }
 }
 
 class Iskele extends StatelessWidget {
+  const Iskele({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Babba Meraba"),
+        title: Text("selman uygulama"),
       ),
-      body: formLogin(),
+      body: selmanBody(),
     );
   }
 }
 
-class formLogin extends StatefulWidget {
-  const formLogin({Key? key}) : super(key: key);
+class selmanBody extends StatefulWidget {
+  const selmanBody({Key? key}) : super(key: key);
 
   @override
-  _formLoginState createState() => _formLoginState();
+  _selmanBodyState createState() => _selmanBodyState();
 }
 
-class _formLoginState extends State<formLogin> {
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+class _selmanBodyState extends State<selmanBody> {
+  String lorem =
+  "                 Lorem Ipsum, dizgi ve baskı endüstrisinde kullanılan mıgır metinlerdir. Lorem Ipsum, adı bilinmeyen bir matbaacının bir hurufat numune kitabı oluşturmak üzere bir yazı galerisini alarak karıştırdığı 1500'lerden beri endüstri standardı sahte metinler olarak kullanılmıştır. Beşyüz yıl boyunca varlığını sürdürmekle kalmamış, aynı zamanda pek değişmeden elektronik dizgiye de sıçramıştır. 1960'larda Lorem Ipsum pasajları da içeren Letraset yapraklarının yayınlanması ile ve yakın zamanda Aldus PageMaker gibi Lorem Ipsum sürümleri içeren masaüstü yayıncılık yazılımları ile popüler olmuştur."
+      .toLowerCase()
+      .replaceAll(",", "")
+      .replaceAll(".", "");
+  var shonwWidget;
+  int step = 0;
+  int score = 0;
+  late int lastTypedAt;
+  String username = "";
 
-  TextEditingController t1 = TextEditingController();
-  TextEditingController t2 = TextEditingController();
+  updateLastTypeAd() {
+    lastTypedAt = DateTime.now().millisecondsSinceEpoch;
+  }
 
-  String mail = "itm@gmail.com", pass = "123", sonuc = "";
+  onType(String value) {
+    updateLastTypeAd();
+    String trimedValue = lorem.trimLeft();
+    setState(() {
+      if (trimedValue.indexOf(value) != 0) {
+        step = 2;
+      } else {
+        score = value.length;
+      }
+    });
+    print(value);
+  }
 
-  bool checkLogin() {
-    if (mail == t1.text && pass == t2.text) {
+  onUserName(String value) {
+    setState(() {
+      username = value;
+      print(username);
+    });
+  }
+
+  step2at() {
+    setState(() {
+      score = 0;
+      step = 0;
+    });
+  }
+
+  baslat() {
+    setState(() {
+      updateLastTypeAd();
+      step++;
+    });
+    var timer = Timer.periodic(new Duration(seconds: 1), (timer) {
+      int now = DateTime.now().millisecondsSinceEpoch;
+      //Oyun bittiginde
+      if (step != 1) timer.cancel();
+      if (step == 1 && now - lastTypedAt > 2000) step++;
+
       setState(() {
-        sonuc = "Login successful";
+        if (step != 2) ;
       });
-      return true;
-    } else {
-      setState(() {
-        sonuc = "Login unsuccessful";
-      });
-      return false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (step == 0) {
+      shonwWidget = [
+        TextWidget(
+          text: "Oyuna basla canim",
+          fontWeight: FontWeight.bold,
+        ),
+
+        TextField(
+          autofocus: true,
+          onChanged: onUserName,
+          decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(20),
+                ),
+              ),
+              labelText: "Yaz bakam",
+              labelStyle: TextStyle(
+                fontSize: 25,
+                color: Colors.blue,
+              )),
+        ),
+        RaisedButton(
+          onPressed: username.length==0 ? null:baslat,
+          child: Text("Basla agam!"),
+        )
+      ];
+    } else if (step == 1) {
+      shonwWidget = [
+        TextWidget(text: "$score"),
+        Container(
+          height: 20,
+          child: Marquee(
+            text: lorem,
+            style: TextStyle(fontWeight: FontWeight.bold),
+            scrollAxis: Axis.horizontal,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            blankSpace: 20.0,
+            velocity: 75.0,
+            startPadding: 0,
+            accelerationDuration: Duration(seconds: 15),
+            accelerationCurve: Curves.linear,
+            decelerationDuration: Duration(milliseconds: 500),
+            decelerationCurve: Curves.easeOut,
+          ),
+        ),
+        SizedBox(
+          height: 30,
+        ),
+        TextField(
+          autofocus: true,
+          onChanged: onType,
+          decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(20),
+                ),
+              ),
+              labelText: "Yaz bakam",
+              labelStyle: TextStyle(
+                fontSize: 25,
+                color: Colors.blue,
+              )),
+        ),
+      ];
+    } else if (step == 2) {
+      shonwWidget = [
+        TextWidget(text: "Agam yandin ya $score aldin mubarek"),
+        RaisedButton(
+          onPressed: step2at,
+          child: TextWidget(text: "Yeniden dene agam"),
+        )
+      ];
     }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextFormField(
-              controller: t1,
-              keyboardType: TextInputType.emailAddress,
-              autofillHints: [AutofillHints.email],
-              decoration: new InputDecoration(
-                  prefixIcon: Icon(Icons.mail),
-                  border: InputBorder.none,
-                  focusedBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.teal)),
-                  enabledBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.teal)),
-                  focusedErrorBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.red)),
-                  errorBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.red)),
-                  disabledBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.yellow)),
-                  contentPadding:
-                      EdgeInsets.only(left: 15, bottom: 11, top: 11, right: 15),
-                  hintText: "E-mail address:"),
-              validator: (String? value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                if (!RegExp(
-                        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                    .hasMatch(value)) {
-                  return "Email dogrulanmadi";
-                }
-
-                return null;
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextFormField(
-              controller: t2,
-              keyboardType: TextInputType.number,
-              decoration: new InputDecoration(
-                  prefixIcon: Icon(Icons.lock),
-                  border: InputBorder.none,
-                  focusedBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.teal)),
-                  enabledBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.teal)),
-                  focusedErrorBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.red)),
-                  errorBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.red)),
-                  disabledBorder: OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.yellow)),
-                  contentPadding:
-                      EdgeInsets.only(left: 15, bottom: 11, top: 11, right: 15),
-                  hintText: "Hint here"),
-              validator: (String? value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                if (value.length < 3) {
-                  return '3 karakter';
-                }
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                // Validate will return true if the form is valid, or false if
-                // the form is invalid.
-                if (_formKey.currentState!.validate()) {
-                  if (checkLogin()) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => index(
-                          laq : t1.text,
-                          pars: t2.text,
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
-              child: const Text('Submit'),
-            ),
-          ),
-          Text(sonuc),
-        ],
-      ),
-    );
-  }
-}
-
-/*
-class login extends StatefulWidget {
-  @override
-  _loginState createState() => _loginState();
-}
-
-class _loginState extends State<login> {
-  String username = "itm", pass = "123",sonuc="";
-
-  TextEditingController t1 = TextEditingController();
-  TextEditingController t2 = TextEditingController();
-
-  loginapp() {
-    setState(() {
-      if (username == t1.text && pass == t2.text) {
-        sonuc = "Giris Yapildi";
-      }
-      else{
-        sonuc = "Hatali giris yaptiiz";
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        child: Column(
-          children: <Widget>[
-            Text("Username"),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: t1,
-                decoration: new InputDecoration(
-                    border: InputBorder.none,
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: new BorderSide(color: Colors.red)),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: new BorderSide(color: Colors.cyanAccent)),
-                    contentPadding: EdgeInsets.only(
-                        left: 15, bottom: 11, top: 11, right: 15),
-                    hintText: "Username here"),
-              ),
-            ),
-            Text("Passw"),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: t2,
-                keyboardType: TextInputType.number,
-                obscureText: true,
-                decoration: new InputDecoration(
-
-                    border: InputBorder.none,
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: new BorderSide(color: Colors.red)),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: new BorderSide(color: Colors.cyanAccent)),
-                    contentPadding: EdgeInsets.only(
-                        left: 15, bottom: 11, top: 11, right: 15),
-                    hintText: "Passw here"),
-              ),
-            ),
-            RaisedButton(onPressed: loginapp, child: Text("Login")),
-            Text(sonuc),
-          ],
-        ),
-      ),
-    );
-  }
-}
-*/
-
-/*
-class AnaEkran extends StatefulWidget /*Aga degisen ozllikler buraya*/ {
-  @override
-  _AnaEkranState createState() => _AnaEkranState();
-}
-
-class _AnaEkranState extends State<AnaEkran> {
-  Color sea = Colors.black;
-  Color cnm = Colors.white;
-  num sayi1 = 0, sayi2 = 0, sonuc = 0;
-
-  TextEditingController t1 = TextEditingController();
-  TextEditingController t2 = TextEditingController();
-
-  toplaButon() {
-    setState(() {
-      sayi1 = num.parse(t1.text);
-      sayi2 = num.parse(t2.text);
-
-      sonuc = sayi1 + sayi2;
-
-      sea = Colors.black38;
-      cnm = Colors.blue;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Text("$sonuc"),
-            TextField(controller: t1, keyboardType: TextInputType.number),
-            SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: t2,
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                    border: InputBorder.none,
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: new BorderSide(color: Colors.teal)),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: new BorderSide(color: Colors.teal)),
-                    errorBorder: OutlineInputBorder(
-                        borderSide: new BorderSide(color: Colors.teal)),
-                    disabledBorder: OutlineInputBorder(
-                        borderSide: new BorderSide(color: Colors.teal)),
-                    contentPadding: EdgeInsets.only(
-                        left: 15, bottom: 11, top: 11, right: 15),
-                    hintText: "Hint here"),
-              ),
-            ),
-            RaisedButton(
-              onPressed: toplaButon,
-              color: sea,
-              textColor: cnm,
-              child: Text("Hocamm"),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-*/
-
-/* class _AnaEkranState extends State<AnaEkran> {
-  String blogYazisi = "baba meraba";
-  int sayi = 3;
-  Color color = Colors.red;
-  String yazidegis = "selammm";
-  Color textcolor = Colors.black;
-
-  martGoster() {
-    setState(() {
-      blogYazisi = "meraba gardas";
-    });
-  }
-
-  sayiArtt() {
-    setState(() /*ekran guncelle*/ {
-      sayi += 1;
-      color = Colors.blue;
-      textcolor = Colors.white;
-      yazidegis = "SELAMMM";
-    });
-  }
-
-  agaNoldu() {
-    setState(() {
-      blogYazisi = "agadegisss";
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(),
-            TextField(),
-            Text(blogYazisi),
-            Text(sayi.toString()),
-            Wrap(
-              direction: Axis.horizontal,
-              alignment: WrapAlignment.end,
-              spacing: 20,
-              runSpacing: 20.0,
-              children: [
-                RaisedButton(
-                    child: Text("Hesapla"), onPressed: martGoster),
-                RaisedButton(
-                  onPressed: agaNoldu,
-                  child: Text("tekrar degis knk"),
-                ),
-                RaisedButton(
-                  onPressed: sayiArtt,
-                  color: color,
-                  textColor: textcolor,
-                  child: Text(yazidegis),
-                ),
-                RaisedButton(
-                  onPressed: agaNoldu,
-                  child: Text("tekrar degis knk"),
-                ),
-              ],
-            )
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: shonwWidget,
+          ),
         ),
       ),
     );
   }
-}*/
-
-/*
-class AnimatedContainerApp extends StatefulWidget {
-  @override
-  _AnimatedContainerAppState createState() => _AnimatedContainerAppState();
 }
 
-class _AnimatedContainerAppState extends State<AnimatedContainerApp> {
-  // Define the various properties with default values. Update these properties
-  // when the user taps a FloatingActionButton.
-  double _width = 50;
-  double _height = 50;
-  Color _color = Colors.green;
-  BorderRadiusGeometry _borderRadius = BorderRadius.circular(8);
+class TextWidget extends StatelessWidget {
+  TextWidget({
+    Key? key,
+    required this.text,
+    this.fontWeight = FontWeight.normal,
+    this.fontSize = 25,
+    this.fontColor = Colors.red,
+  }) : super(key: key);
+  double fontSize;
+  Color fontColor;
+  String text;
+  FontWeight fontWeight;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('AnimatedContainer Demo'),
-        ),
-        body: Center(
-          child: AnimatedContainer(
-            // Use the properties stored in the State class.
-            width: _width,
-            height: _height,
-            decoration: BoxDecoration(
-              color: _color,
-              borderRadius: _borderRadius,
-            ),
-            // Define how long the animation should take.
-            duration: const Duration(seconds: 1),
-            // Provide an optional curve to make the animation feel smoother.
-            curve: Curves.fastOutSlowIn,
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          // When the user taps the button
-          onPressed: () {
-            // Use setState to rebuild the widget with new values.
-            setState(() {
-              // Create a random number generator.
-              final random = Random();
-
-              // Generate a random width and height.
-              _width = random.nextInt(300).toDouble();
-              _height = random.nextInt(300).toDouble();
-
-              // Generate a random color.
-              _color = Color.fromRGBO(
-                random.nextInt(256),
-                random.nextInt(256),
-                random.nextInt(256),
-                1,
-              );
-
-              // Generate a random border radius.
-              _borderRadius =
-                  BorderRadius.circular(random.nextInt(100).toDouble());
-            });
-          },
-          child: const Icon(Icons.play_arrow),
-        ),
-      ),
+    return Column(
+      children: [
+        Text(
+          text,
+          style: TextStyle(
+              color: fontColor,
+              letterSpacing: 2,
+              fontSize: fontSize,
+              fontFamily: "Arial"),
+          maxLines: 1,
+          softWrap: false,
+        )
+      ],
     );
   }
 }
-********************************************************************/
